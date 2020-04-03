@@ -10,7 +10,7 @@
 
 ## 1.IoC 容器
 
-### 1.1介绍Spring IoC容器和Beans
+### 1.1.介绍Spring IoC容器和Beans
 
 这一章讲的是Sprig Framework如何实现IoC（Inversion of Control，控制反转），IoC也叫DI（Dependency Injection，依赖注入）。调用工厂方法，仅传入参数，构造实例对象。在创建bean时，容器就注入这些以来（参数？）。通过类构造或者一些机制比如Service Locator pattern，使bean的控制实例化或依赖位置发生反转。
 
@@ -37,7 +37,54 @@
 
 
 
-1.2
+### 1.2.容器概述
+
+`org.springframework.context.ApplicationContext`接口实现IoC，负责实例化、配置和装配bean。通过读取配置元数据，容器获取object实例化、配置和装配的指令。配置的元数据可以是XML、Java注解、Java Code。
+
+`ApplicationContext`接口的实现：在单应用中，通常创建一个`ClassPathXmlApplicationContext` 或者 `FileSystemXmlApplicationContet`实例
+
+
+
+应用classes与配置元数据组合，`ApplicationContext`创建并且初始化后，配置好并且应用已经是可执行
+
+![The Spring IoC container](https://docs.spring.io/spring/docs/5.2.5.RELEASE/spring-framework-reference/images/container-magic.png)
+
+#### 1.2.1.配置元数据
+
+- XML-based configuration
+
+  ```xml
+  <?xml version="1.0" encoding="UTF-8"?>
+  <beans xmlns="http://www.springframework.org/schema/beans"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:schemaLocation="http://www.springframework.org/schema/beans
+          https://www.springframework.org/schema/beans/spring-beans.xsd">
+  
+      <bean id="..." class="...">  
+          <!-- collaborators and configuration for this bean go here -->
+      </bean>
+  
+      <bean id="..." class="...">
+          <!-- collaborators and configuration for this bean go here -->
+      </bean>
+  
+      <!-- more bean definitions go here -->
+  
+  </beans>
+  ```
+
+  - id属性是一个字符串，识别区分bean
+  - class属性定义bean的类型和类名
+
+- Annotation-based configuration
+
+- Java-based configuration
+
+
+
+#### 1.2.2.实例化一个容器
+
+
 
 1.3
 
