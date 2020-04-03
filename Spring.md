@@ -84,15 +84,95 @@
 
 #### 1.2.2.实例化一个容器
 
+字符串path路径提供给`ApplicationContext`构造器，加载配置元数据，比如加载本地文件、Java CLASSPATH
 
 
-1.3
 
-1.4
+`ApplicationContext context = new ClassPathXmlApplicationContext("services.xml", "daos.xml");`
+
+
+
+services.xml
+
+```xml
+<beans >
+    <bean id="petStore" class="">
+        <property name="accountDao" ref="accountDao"/>
+        <property name="itemDao" ref="itemDao"/>
+    </bean>
+</beans>
+```
+
+
+
+daos.xml
+
+```xml
+<beans>
+    <bean id="accountDao" class=""></bean>
+    <bean id="itemDao" class=""></bean>
+</beans>
+```
+
+
+
+services.xml: bean.petStore.accountDao.ref -> daos.xml: bean.accountDao
+
+
+
+**导入多个XML配置**
+
+```xml
+<beans>
+    <import resource="services.xml"/>
+    <import resource="resources/messageSource.xml"/>
+    <import resource="/resources/themeSource.xml"/>
+
+    <bean id="bean1" class="..."/>
+    <bean id="bean2" class="..."/>
+</beans>
+```
+
+不推荐使用的路径`classpath:../services.xml`
+
+绝对路径`file:C:/config/services.xml`
+
+
+
+#### 1.2.3. 使用容器
+
+`ApplicationContext`接口增强工厂方法的能力，维护各个bean的注册列表和依赖，使用`getBean`可以获取实例bean
+
+
+
+访问bean的例子：
+
+```java
+// 创建和配置beans
+ApplicationContext context = new ClassPathXmlApplicationContext("services.xml", "daos.xml");
+
+// 获取根据配置实例化的bean
+PetStoreService service = context.getBean("petStore", PetStoreService.class);
+
+// 调用实例方法
+List<String> userList = service.getUsernameList();
+```
+
+
+
+### 1.3.Bean 概述
+
+
+
+
+
+
+
+1.4.
 
 ...
 
-1.16
+1.16.
 
 
 
