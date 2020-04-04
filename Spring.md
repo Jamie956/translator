@@ -162,9 +162,36 @@ List<String> userList = service.getUsernameList();
 
 ### 1.3.Bean 概述
 
+IoC容器管理着多个beans，这些beans是根据用户提供的元数据配置创建的
+
+定义bean的属性：
+
+- Class
+- Name
+- Scope
+- Contructor arguments
+- Properties
+- Autowiring mode
+- Lazy initialization mode
+- Initialization method
+- Description method
 
 
 
+#### 1.3.1.Beans的命名空间
+
+在容器内，每一个bean都有唯一识别
+
+基于XML配置时，id、name区分bean，id是唯一
+
+
+
+别名
+
+```xml
+<alias name="myApp-dataSource" alias="subsystemA-dataSource"/>
+<alias name="myApp-dataSource" alias="subsystemB-dataSource"/>
+```
 
 
 
