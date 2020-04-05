@@ -615,7 +615,6 @@ bean域：
 - session：单个bean定义，对应HTTP Session的生命周期，产生一个Session就创建一个实例
 - application：to lifecycle of a ServletContext
 - websocket：to lifecycle of a WebSocket
-- 
 
 
 
