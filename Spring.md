@@ -195,7 +195,216 @@ IoC容器管理着多个beans，这些beans是根据用户提供的元数据配�
 
 
 
-1.4.
+#### 1.3.2.beans的实例化
+
+容器构造bean实例
+
+对于静态内部类，`class=com.example.SomeThing$OtherThing`
+
+
+
+**静态工厂实例化bean**
+
+```xml
+<bean id="clientService" class="examples.ClientService" factory-method="createInstance"/>
+```
+
+
+
+```java
+public class ClientService {
+    private static ClientService clientService = new ClientService();
+    private ClientService() {}
+
+    public static ClientService createInstance() {
+        return clientService;
+    }
+}
+```
+
+
+
+**使用已经实例化bean的工厂方法来实例化**
+
+```xml
+<bean id="serviceLocator" class="examples.DefaultServiceLocator">
+    <!-- inject any dependencies required by this locator bean -->
+</bean>
+
+<bean id="clientService"
+    factory-bean="serviceLocator"
+    factory-method="createClientServiceInstance"/>
+
+<bean id="accountService"
+    factory-bean="serviceLocator"
+    factory-method="createAccountServiceInstance"/>
+```
+
+
+
+```java
+public class DefaultServiceLocator {
+
+    private static ClientService clientService = new ClientServiceImpl();
+
+    private static AccountService accountService = new AccountServiceImpl();
+
+    public ClientService createClientServiceInstance() {
+        return clientService;
+    }
+
+    public AccountService createAccountServiceInstance() {
+        return accountService;
+    }
+}
+```
+
+
+
+### 1.4.依赖
+
+bean/object之间的依赖
+
+
+
+#### 1.4.1.依赖注入
+
+根据object定义的依赖，通过构造参数、参数给工厂方法，或者工厂方法构造返回之后给实例设置属性
+
+注入的两种方式：
+
+- Constructor-based Dependency Injection
+
+  - 构造参数固定
+
+    ```java
+    package x.y;
+    
+    //POJO（Plain Ordinary Java Object）
+    public class ThingOne {
+        public ThingOne(ThingTwo thingTwo, ThingThree thingThree) {
+            // ...
+        }
+    }
+    ```
+
+    ```xml
+    <beans>
+        <bean id="beanOne" class="x.y.ThingOne">
+            <constructor-arg ref="beanTwo"/>
+            <constructor-arg ref="beanThree"/>
+        </bean>
+        <bean id="beanTwo" class="x.y.ThingTwo"/>
+        <bean id="beanThree" class="x.y.ThingThree"/>
+    </beans>
+    ```
+
+  - 构造参数类型匹配/索引
+
+    ```java
+    package examples;
+    
+    public class ExampleBean {
+        // Number of years to calculate the Ultimate Answer
+        private int years;
+        // The Answer to Life, the Universe, and Everything
+        private String ultimateAnswer;
+        public ExampleBean(int years, String ultimateAnswer) {
+            this.years = years;
+            this.ultimateAnswer = ultimateAnswer;
+        }
+    }
+    
+    ```
+
+    ```xml
+    <!-- 根据参数类型 -->
+    <bean id="exampleBean" class="examples.ExampleBean">
+        <constructor-arg type="int" value="7500000"/>
+        <constructor-arg type="java.lang.String" value="42"/>
+    </bean>
+    
+    <!-- 根据参数索引 -->
+    <bean id="exampleBean" class="examples.ExampleBean">
+        <constructor-arg index="0" value="7500000"/>
+        <constructor-arg index="1" value="42"/>
+    </bean>
+    ```
+
+  - 构造参数名
+
+    ```xml
+    <bean id="exampleBean" class="examples.ExampleBean">
+        <constructor-arg name="years" value="7500000"/>
+        <constructor-arg name="ultimateAnswer" value="42"/>
+    </bean>
+    ```
+
+    ```java
+    package examples;
+    
+    public class ExampleBean {
+        // Fields omitted
+        @ConstructorProperties({"years", "ultimateAnswer"})
+        public ExampleBean(int years, String ultimateAnswer) {
+            this.years = years;
+            this.ultimateAnswer = ultimateAnswer;
+        }
+    }
+    ```
+
+    
+
+- Setter-based Dependency Injection：工厂方法调取无参构造函数或无参静态构造函数实例化后，调取bean的 setter进行注入
+
+  ```java
+  public class ExampleBean {
+      private AnotherBean beanOne;
+      private YetAnotherBean beanTwo;
+      private int i;
+    
+      public void setBeanOne(AnotherBean beanOne) {
+          this.beanOne = beanOne;
+      }
+      public void setBeanTwo(YetAnotherBean beanTwo) {
+          this.beanTwo = beanTwo;
+      }
+      public void setIntegerProperty(int i) {
+          this.i = i;
+      }
+  }
+  ```
+
+  ```xml
+  <bean id="exampleBean" class="examples.ExampleBean">
+      <!-- setter injection using the nested ref element -->
+      <property name="beanOne">
+          <ref bean="anotherExampleBean"/>
+      </property>
+  
+      <!-- setter injection using the neater ref attribute -->
+      <property name="beanTwo" ref="yetAnotherBean"/>
+      <property name="integerProperty" value="1"/>
+  </bean>
+  
+  <bean id="anotherExampleBean" class="examples.AnotherBean"/>
+  <bean id="yetAnotherBean" class="examples.YetAnotherBean"/>
+  ```
+
+
+
+用Constructor-based 还是 Setter-based 注入？
+
+- Constructor-based：确保值不为空，直接返回构造好初始好的实例，
+- Setter-based：大量的构造参数，有bad code的味道，有更多的责任。要检查空值。好处就是可以在Setter里重新配置或重注入
+
+
+
+#### 1.4.2.依赖于配置
+
+
+
+
 
 ...
 
