@@ -400,9 +400,226 @@ bean/object之间的依赖
 
 
 
-#### 1.4.2.依赖于配置
+#### 1.4.2.依赖与配置
+
+```xml
+<bean id="moreComplexObject" class="example.ComplexObject">
+    <!-- results in a setAdminEmails(java.util.Properties) call -->
+    <property name="adminEmails">
+        <props>
+            <prop key="administrator">administrator@example.org</prop>
+            <prop key="support">support@example.org</prop>
+            <prop key="development">development@example.org</prop>
+        </props>
+    </property>
+    <!-- results in a setSomeList(java.util.List) call -->
+    <property name="someList">
+        <list>
+            <value>a list element followed by a reference</value>
+            <ref bean="myDataSource" />
+        </list>
+    </property>
+    <!-- results in a setSomeMap(java.util.Map) call -->
+    <property name="someMap">
+        <map>
+            <entry key="an entry" value="just some string"/>
+            <entry key ="a ref" value-ref="myDataSource"/>
+        </map>
+    </property>
+    <!-- results in a setSomeSet(java.util.Set) call -->
+    <property name="someSet">
+        <set>
+            <value>just some string</value>
+            <ref bean="myDataSource" />
+        </set>
+    </property>
+</bean>
+```
 
 
+
+**转型**
+
+```java
+public class SomeClass {
+
+    private Map<String, Float> accounts;
+
+    public void setAccounts(Map<String, Float> accounts) {
+        this.accounts = accounts;
+    }
+}
+```
+
+```xml
+<beans>
+    <bean id="something" class="x.y.SomeClass">
+        <property name="accounts">
+            <map>
+              	<!-- value是double，向上转型，转成float -->
+                <entry key="one" value="9.99"/>
+                <entry key="two" value="2.75"/>
+                <entry key="six" value="3.99"/>
+            </map>
+        </property>
+    </bean>
+</beans>
+```
+
+
+
+**Null和空字符串处理**
+
+空字符串：
+
+```xml
+<bean class="ExampleBean">
+    <property name="email" value=""/>
+</bean>
+```
+
+相当于
+```java
+exampleBean.setEmail("");
+```
+
+
+
+Null值：
+
+```xml
+<bean class="ExampleBean">
+    <property name="email">
+        <null/>
+    </property>
+</bean>
+```
+
+相当于
+
+```java
+exampleBean.setEmail(null);
+```
+
+
+
+#### 1.4.3.使用 `denpends-on`
+
+bean属性`depends-on`可以关联多个依赖关系的bean，先去初始化他们
+
+```xml
+<bean id="beanOne" class="ExampleBean" depends-on="manager,accountDao">
+    <property name="manager" ref="manager" />
+</bean>
+
+<bean id="manager" class="ManagerBean" />
+<bean id="accountDao" class="x.y.jdbc.JdbcAccountDao" />
+```
+
+
+
+#### 1.4.4.懒加载beans
+
+`ApplicationContext`预初始化式eagerly饿汉式，创建和配置全部单例beans，如果你不喜欢，可以使用懒加载，IoC在你第一次请求bean的时候再去创建实例
+
+```xml
+<bean id="lazy" class="com.something.ExpensiveToCreateBean" lazy-init="true"/>
+```
+
+
+
+```xml
+<beans default-lazy-init="true">
+    <!-- no beans will be pre-instantiated... -->
+</beans>
+```
+
+
+
+#### 1.4.5.自动装配
+
+
+
+#### 1.4.6.方法注入
+
+假设有单例bean A，非单例bean B，A用到B，A只会初始化一次，如果B更改了，那么A里的B就不是最新，怎么保证A里的B是新的？
+
+
+
+Lookup Method Injection：容器重写方法，返回lookup结果，lookup一般是prototype bean，cglib动态生成二进制subclass重写方法
+
+```java
+// a class that uses a stateful Command-style class to perform some processing
+package fiona.apple;
+
+// Spring-API imports
+import org.springframework.beans.BeansException;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
+
+public class CommandManager implements ApplicationContextAware {
+
+    private ApplicationContext applicationContext;
+
+    public Object process(Map commandState) {
+        // grab a new instance of the appropriate Command
+        Command command = createCommand();
+        // set the state on the (hopefully brand new) Command instance
+        command.setState(commandState);
+        return command.execute();
+    }
+
+    protected Command createCommand() {
+        // notice the Spring API dependency!
+        return this.applicationContext.getBean("command", Command.class);
+    }
+
+    public void setApplicationContext(
+            ApplicationContext applicationContext) throws BeansException {
+        this.applicationContext = applicationContext;
+    }
+}
+```
+
+```xml
+<!-- a stateful bean deployed as a prototype (non-singleton) -->
+<bean id="myCommand" class="fiona.apple.AsyncCommand" scope="prototype">
+    <!-- inject dependencies here as required -->
+</bean>
+
+<!-- commandProcessor uses statefulCommandHelper -->
+<bean id="commandManager" class="fiona.apple.CommandManager">
+    <lookup-method name="createCommand" bean="myCommand"/>
+</bean>
+
+```
+
+
+
+### 1.5.bean域
+
+同样一个菜（instance），做多少碟，都是按一个菜谱（bean definition）
+
+
+
+- 定义好的bean创建的object，可以塞了各个依赖和配置
+- 可以控制这个object的域
+
+
+
+bean域：
+
+- singletion：默认的域，对于每个IoC容器，单个bean定义，只创建单个实例
+- prototype：单个bean定义，可以用来创建多个实例
+- request：单个bean定义，每个HTTP请求，都会按照定义创建一个实例
+- session：单个bean定义，对应HTTP Session的生命周期，产生一个Session就创建一个实例
+- application：to lifecycle of a ServletContext
+- websocket：to lifecycle of a WebSocket
+- 
+
+
+
+#### 1.5.1.单例域
 
 
 
