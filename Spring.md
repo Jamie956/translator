@@ -621,6 +621,94 @@ bean域：
 
 #### 1.5.1.单例域
 
+singleton scope
+
+singleton只有一个共享实例，根据id从容器获取bean
+
+对于singleton scope的bean，容器只会根据bean的定义创建一个实例，实例储存在cache里
+
+![](https://docs.spring.io/spring/docs/5.2.5.RELEASE/spring-framework-reference/images/singleton.png)
+
+
+
+#### 1.5.2.原型域
+
+prototype scope
+
+每次获取的bean，都是一个新创建的bean
+
+![](https://docs.spring.io/spring/docs/5.2.5.RELEASE/spring-framework-reference/images/prototype.png)
+
+```xml
+<bean id="accountService" class="com.something.DefaultAccountService" scope="prototype"/>
+```
+
+
+
+#### 1.5.4.web相关的域
+
+
+
+Request, Session, Application, and WebSocket Scopes
+
+
+
+```xml
+<bean id="userPreferences" class="com.something.UserPreferences" scope="session"/>
+
+<bean id="userManager" class="com.something.UserManager">
+    <property name="userPreferences" ref="userPreferences"/>
+</bean>
+```
+
+bean userPreferences 属于session scope，每产生一个新的session都会有一个新的实例，而userManager默认属于singleton scope，就出现这样的问题，userManager只会初始化一遍，所以他的属性userManager.userPreferences是不会变的，即使userPreferences发生了改变，所以userPreferences在新建一个实例的时候，得告诉userManager，方法是userManager实例调用方法时使用代理，注入userPreferences，获取最新版本的userPreferences。
+
+
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:aop="http://www.springframework.org/schema/aop"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans
+        https://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/aop
+        https://www.springframework.org/schema/aop/spring-aop.xsd">
+
+    <!-- an HTTP Session-scoped bean exposed as a proxy -->
+    <bean id="userPreferences" class="com.something.UserPreferences" scope="session">
+        <!-- instructs the container to proxy the surrounding bean -->
+        <aop:scoped-proxy/> 
+    </bean>
+
+    <!-- a singleton-scoped bean injected with a proxy to the above bean -->
+    <bean id="userService" class="com.something.SimpleUserService">
+        <!-- a reference to the proxied userPreferences bean -->
+        <property name="userPreferences" ref="userPreferences"/>
+    </bean>
+</beans>
+```
+
+
+
+使用JDK代理：
+
+```xml
+<aop:scoped-proxy proxy-target-class="false"/>
+```
+
+
+
+#### 1.5.5.自定义域
+
+custom scopes
+
+
+
+
+
+
+
 
 
 ...
