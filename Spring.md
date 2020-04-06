@@ -867,7 +867,191 @@ public class DefaultBlogService implements BlogService {
 
 
 
-Example: The Class Name Substitution
+#### 1.8.3.自定义实例逻辑
+
+`org.springframework.beans.factory.FactoryBean`接口 可以操作IoC容器实例逻辑
+
+`FactoryBean`接口方法：
+
+- `Object getObject()`获取工厂创建的实例
+- `boolean isSingleton()`
+
+
+
+### 1.9.基于注解的容器配置
+
+
+
+#### 1.9.1.@Required
+
+
+
+用在Setter，表示在配置的时候必须要有值
+
+```java
+public class SimpleMovieLister {
+    private MovieFinder movieFinder;
+    @Required
+    public void setMovieFinder(MovieFinder movieFinder) {
+        this.movieFinder = movieFinder;
+    }
+    // ...
+}
+```
+
+
+
+#### 1.9.2.@Autowired
+
+- 用在构造器
+
+  ```java
+  public class MovieRecommender {
+      private final CustomerPreferenceDao customerPreferenceDao;
+      @Autowired
+      public MovieRecommender(CustomerPreferenceDao customerPreferenceDao) {
+          this.customerPreferenceDao = customerPreferenceDao;
+      }
+  }
+  ```
+
+- 用在Setter
+
+  ```java
+  public class SimpleMovieLister {
+      private MovieFinder movieFinder;
+      @Autowired
+      public void setMovieFinder(MovieFinder movieFinder) {
+          this.movieFinder = movieFinder;
+      }
+  }
+  ```
+
+
+
+- 随便一个方法
+
+  ```java
+  public class MovieRecommender {
+      private MovieCatalog movieCatalog;
+      private CustomerPreferenceDao customerPreferenceDao;
+      @Autowired
+      public void prepare(MovieCatalog movieCatalog,
+              CustomerPreferenceDao customerPreferenceDao) {
+          this.movieCatalog = movieCatalog;
+          this.customerPreferenceDao = customerPreferenceDao;
+      }
+  }
+  ```
+
+- 同时用在变量和构造函数
+
+  ```java
+  public class MovieRecommender {
+      private final CustomerPreferenceDao customerPreferenceDao;
+      @Autowired
+      private MovieCatalog movieCatalog;
+      @Autowired
+      public MovieRecommender(CustomerPreferenceDao customerPreferenceDao) {
+          this.customerPreferenceDao = customerPreferenceDao;
+      }
+  }
+  ```
+
+  
+
+#### 1.9.3@Primary
+
+
+
+#### 1.9.4.@Qualifier
+
+```java
+public class MovieRecommender {
+
+    @Autowired
+    @Qualifier("main")
+    private MovieCatalog movieCatalog;
+
+    // ...
+}
+
+```
+
+
+
+#### 1.9.6.Using `CustomAutowireConfigurer`
+
+
+
+#### 1.9.7.@Resource
+
+
+
+#### 1.9.8.@Value
+
+用在参数
+
+```java
+@Component
+public class MovieRecommender {
+    private final String catalog;
+    public MovieRecommender(@Value("${catalog.name}") String catalog) {
+        this.catalog = catalog;
+    }
+}
+```
+
+
+
+读取配置
+
+```java
+@Configuration
+@PropertySource("classpath:application.properties")
+public class AppConfig { }
+```
+
+
+
+配置
+
+```java
+catalog.name=MovieCatalog
+```
+
+
+
+#### 1.9.9.@PostContruct & @PreDestroy
+
+```java
+public class CachingMovieLister {
+
+    @PostConstruct
+    public void populateMovieCache() {
+        // populates the movie cache upon initialization...
+    }
+
+    @PreDestroy
+    public void clearMovieCache() {
+        // clears the movie cache upon destruction...
+    }
+}
+```
+
+
+
+### 1.10.扫描和组件管理
+
+
+
+#### 1.10.1.@Component
+
+#### 1.10.3. Automatically Detecting Classes and Registering Bean Definitions
+
+
+
+
 
 ...
 
