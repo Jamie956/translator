@@ -832,17 +832,42 @@ public class DefaultBlogService implements BlogService {
 
 
 
+一个bean的定义配置信息包括构造参数、属性、容器定制信息（初始化方法、静态工厂方法名）等等。子bean可以继承父的定义，而且可以重写
+
+```xml
+<bean id="inheritedTestBean" abstract="true"
+        class="org.springframework.beans.TestBean">
+    <property name="name" value="parent"/>
+    <property name="age" value="1"/>
+</bean>
+
+<bean id="inheritsWithDifferentClass"
+        class="org.springframework.beans.DerivedTestBean"
+        parent="inheritedTestBean" init-method="initialize">  
+    <property name="name" value="override"/>
+    <!-- the age property value of 1 will be inherited from parent -->
+</bean>
+```
 
 
 
+### 1.8.容器扩展
 
 
 
+#### 1.8.1.自定义beans
+
+使用`BeanPostProcessor`接口定义回调方法，可以操作容器实例逻辑
 
 
 
+#### 1.8.2.自定义配置元数据
+
+使用`BeanFactoryPostProcessor`，能够在容器实例化bean之前修改配置元数据
 
 
+
+Example: The Class Name Substitution
 
 ...
 
