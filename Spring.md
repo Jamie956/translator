@@ -704,6 +704,140 @@ custom scopes
 
 
 
+### 1.6.自定义bean
+
+#### 1.6.1.生命周期回调
+
+**初始化回调**：`org.springframework.beans.factory.InitializingBean`接口 在容器装配好全部属性之后，执行初始化工作。
+
+
+
+`InitializingBean`接口声明了这个方法：
+
+```java
+void afterPropertiesSet() throws Exception;
+```
+
+
+
+- 不推荐使用``InitializingBean`接口，会造成代码与spring的耦合
+
+  ```xml
+  <bean id="exampleInitBean" class="examples.AnotherExampleBean"/>
+  ```
+
+  ```java
+  public class AnotherExampleBean implements InitializingBean {
+      @Override
+      public void afterPropertiesSet() {
+          // do some initialization work
+      }
+  }
+  ```
+
+- 可以使用`init-method`或者注解` @PostConstruct`
+
+  ```xml
+  <bean id="exampleInitBean" class="examples.ExampleBean" init-method="init"/>
+  ```
+
+  ```java
+  public class ExampleBean {
+      public void init() {
+          // do some initialization work
+      }
+  }
+  ```
+
+  
+
+**销毁回调**：`org.springframework.beans.factory.DisposableBean`实现该能力，当包含be an的容器销毁时，获取一个回调
+
+
+
+`DisposableBean`声明了这个方法：
+
+```java
+void destroy() throws Exception;
+```
+
+
+
+- 不推荐直接使用`DisposableBean`接口
+
+  ```xml
+  <bean id="exampleInitBean" class="examples.AnotherExampleBean"/>
+  
+  ```
+
+  ```java
+  public class AnotherExampleBean implements DisposableBean {
+      @Override
+      public void destroy() {
+          // do some destruction work (like releasing pooled connections)
+      }
+  }
+  ```
+
+  
+
+- 推荐使用` @PreDestroy`注解或者声明一个方法`destroy-method`
+
+  ```xml
+  <bean id="exampleInitBean" class="examples.ExampleBean" destroy-method="cleanup"/>
+  ```
+
+  ```java
+  public class ExampleBean {
+      public void cleanup() {
+          // do some destruction work (like releasing pooled connections)
+      }
+  }
+  ```
+
+  
+
+**默认初始化方法和销毁方法**
+
+统一使用`init()`做初始化方法，`destroy()`做销毁方法，就不用像上面那样每个bean配一个方法
+
+```java
+public class DefaultBlogService implements BlogService {
+    private BlogDao blogDao;
+    public void setBlogDao(BlogDao blogDao) {
+        this.blogDao = blogDao;
+    }
+    // this is (unsurprisingly) the initialization callback method
+    public void init() {
+        if (this.blogDao == null) {
+            throw new IllegalStateException("The [blogDao] property must be set.");
+        }
+    }
+}
+```
+
+```xml
+<beans default-init-method="init">
+    <bean id="blogService" class="com.something.DefaultBlogService">
+        <property name="blogDao" ref="blogDao" />
+    </bean>
+</beans>
+```
+
+
+
+### 1.7.bean定义的继承
+
+
+
+
+
+
+
+
+
+
+
 
 
 
