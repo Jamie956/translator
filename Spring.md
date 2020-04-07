@@ -12,7 +12,7 @@
 
 ### 1.1.介绍Spring IoC容器和Beans
 
-这一章讲的是Sprig Framework如何实现IoC（Inversion of Control，控制反转），IoC也叫DI（Dependency Injection，依赖注入）。调用工厂方法，仅传入参数，构造实例对象。在创建bean时，容器就注入这些以来（参数？）。通过类构造或者一些机制比如Service Locator pattern，使bean的控制实例化或依赖位置发生反转。
+IoC（Inversion of Control，控制反转），IoC也叫DI（Dependency Injection，依赖注入）。调用工厂方法，仅传入参数，构造实例对象。在创建bean时，容器就注入这些依赖。通过类构造或者一些机制比如Service Locator pattern，使bean的控制实例化或依赖位置发生反转。
 
 
 
@@ -1047,11 +1047,102 @@ public class CachingMovieLister {
 
 #### 1.10.1.@Component
 
-#### 1.10.3. Automatically Detecting Classes and Registering Bean Definitions
+#### 1.10.3. 自动检测class
+
+具备检测能力
+
+```java
+@Configuration
+@ComponentScan(basePackages = "org.example")
+public class AppConfig  {
+    // ...
+}
+```
 
 
 
+标有注解`@Service`/`@Repository`才能被检测出来
 
+
+
+#### 1.10.4.使用filter自定义扫描
+
+类的默认注解有 @Component, @Repository, @Service, @Controller, @Configuration
+
+
+
+可以自定义filter来实现@Component这些注解同样功能
+
+
+
+filter：
+
+- includeFilters
+- excludeFilters
+
+
+
+注解实现
+
+```java
+@Configuration
+@ComponentScan(basePackages = "org.example",
+        includeFilters = @Filter(type = FilterType.REGEX, pattern = ".*Stub.*Repository"),
+        excludeFilters = @Filter(Repository.class))
+public class AppConfig {
+    ...
+}
+```
+
+
+
+xml实现
+
+```xml
+<beans>
+    <context:component-scan base-package="org.example">
+        <context:include-filter type="regex"
+                expression=".*Stub.*Repository"/>
+        <context:exclude-filter type="annotation"
+                expression="org.springframework.stereotype.Repository"/>
+    </context:component-scan>
+</beans>
+```
+
+
+
+#### 1.10.5.在组件定义bean元数据
+
+```java
+@Component
+public class FactoryMethodComponent {
+
+    @Bean
+    @Qualifier("public")
+    public TestBean publicInstance() {
+        return new TestBean("publicInstance");
+    }
+
+    public void doWork() {
+        // Component method implementation omitted
+    }
+}
+```
+
+
+
+#### 1.10.6.命名自动检测组件
+
+```java
+@Service("myMovieLister")
+public class SimpleMovieLister {
+    // ...
+}
+```
+
+
+
+1.10.7.
 
 ...
 
