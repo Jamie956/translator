@@ -1142,7 +1142,108 @@ public class SimpleMovieLister {
 
 
 
-1.10.7.
+#### 1.10.7.给组件提供scrope
+
+```java
+@Scope("prototype")
+@Repository
+public class MovieFinderImpl implements MovieFinder {
+    // ...
+}
+```
+
+
+
+### 1.12.基于java容器配置
+
+#### 1.12.1.@Bean and @Configuration
+
+```java
+@Configuration
+public class AppConfig {
+
+    @Bean
+    public MyService myService() {
+        return new MyServiceImpl();
+    }
+}
+```
+
+相当于
+
+```xml
+<beans>
+    <bean id="myService" class="com.acme.services.MyServiceImpl"/>
+</beans>
+```
+
+
+
+`@Bean`一般出现在`@Configuration`类下，确保full mode
+
+
+
+#### 1.12.2.实例化容器
+
+`AnnotationConfigApplicationContext`
+
+```java
+public static void main(String[] args) {
+    ApplicationContext ctx = new AnnotationConfigApplicationContext(AppConfig.class);
+    MyService myService = ctx.getBean(MyService.class);
+    myService.doStuff();
+}
+```
+
+
+
+register写法
+
+```java
+public static void main(String[] args) {
+    AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
+    ctx.register(AppConfig.class, OtherConfig.class);
+    ctx.register(AdditionalConfig.class);
+    ctx.refresh();
+    MyService myService = ctx.getBean(MyService.class);
+    myService.doStuff();
+}
+```
+
+
+
+**组件扫描**
+
+```java
+@Configuration
+@ComponentScan(basePackages = "com.acme") 
+public class AppConfig  {
+    ...
+}
+```
+
+
+
+```java
+public static void main(String[] args) {
+    AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
+    ctx.scan("com.acme");
+    ctx.refresh();
+    MyService myService = ctx.getBean(MyService.class);
+}
+```
+
+
+
+#### 1.12.3.使用@Bean注解
+
+
+
+
+
+
+
+
 
 ...
 
