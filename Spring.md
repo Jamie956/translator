@@ -10,7 +10,7 @@
 
 ## 1.IoC 容器
 
-### 1.1.介绍Spring IoC容器和Beans
+### 1.1.Spring IoC容器和Beans
 
 IoC（Inversion of Control，控制反转），IoC也叫DI（Dependency Injection，依赖注入）。调用工厂方法，仅传入参数，构造实例对象。在创建bean时，容器就注入这些依赖。通过类构造或者一些机制比如Service Locator pattern，使bean的控制实例化或依赖位置发生反转。
 
@@ -1554,17 +1554,67 @@ sources.addFirst(new MyPropertySource());
 
 
 
+#### 1.13.3.@PropertySource
+
+```java
+@Configuration
+@PropertySource("classpath:/com/myco/app.properties")
+public class AppConfig {
+
+    @Autowired
+    Environment env;
+
+    @Bean
+    public TestBean testBean() {
+        TestBean testBean = new TestBean();
+        testBean.setName(env.getProperty("testbean.name"));
+        return testBean;
+    }
+}
+```
 
 
 
+messageSource
+
+```java
+public static void main(String[] args) {
+    MessageSource resources = new ClassPathXmlApplicationContext("beans.xml");
+    String message = resources.getMessage("message", null, "Default", Locale.ENGLISH);
+    System.out.println(message);
+}
+```
 
 
 
+```xml
+<beans>
+    <!-- this MessageSource is being used in a web application -->
+    <bean id="messageSource" class="org.springframework.context.support.ResourceBundleMessageSource">
+        <property name="basename" value="exceptions"/>
+    </bean>
+
+    <!-- lets inject the above MessageSource into this POJO -->
+    <bean id="example" class="com.something.Example">
+        <property name="messages" ref="messageSource"/>
+    </bean>
+</beans>
+```
 
 
-...
 
-1.16.
+### 1.16.BeanFactory
+
+#### 1.16.1. BeanFactory or ApplicationContext?
+
+| Feature                                                 | `BeanFactory` | `ApplicationContext` |
+| :------------------------------------------------------ | :------------ | :------------------- |
+| Bean instantiation/wiring                               | Yes           | Yes                  |
+| Integrated lifecycle management                         | No            | Yes                  |
+| Automatic `BeanPostProcessor` registration              | No            | Yes                  |
+| Automatic `BeanFactoryPostProcessor` registration       | No            | Yes                  |
+| Convenient `MessageSource` access (for internalization) | No            | Yes                  |
+| Built-in `ApplicationEvent` publication mechanism       | No            | Yes                  |
 
 
 
